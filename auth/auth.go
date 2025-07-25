@@ -1,4 +1,4 @@
-package middleware
+package auth
 
 import (
 	"context"
@@ -25,7 +25,8 @@ type ContextWithHeader interface {
 }
 type HandlerFunc func(ContextWithHeader)
 
-func AuthRequired() HandlerFunc {
+// publicKeyPath is the path containing the .pem file with the keycloak public key example: "/certs/public.pem"
+func AuthRequired(publicKeyPath string) HandlerFunc {
 	return func(c ContextWithHeader) {
 		authHeader := c.GetHeader("Authorization")
 		split := strings.Split(authHeader, " ")
@@ -41,7 +42,7 @@ func AuthRequired() HandlerFunc {
 			return
 		}
 
-		if isTokenValid, err := validateToken(token); err != nil || !isTokenValid {
+		if isTokenValid, err := validateToken(token, publicKeyPath); err != nil || !isTokenValid {
 			if err != nil {
 				fmt.Fprint(os.Stderr, err.Error())
 			}
@@ -54,8 +55,8 @@ func AuthRequired() HandlerFunc {
 	}
 }
 
-func validateToken(token string) (bool, error) {
-	publicKey, err := getPublicKey()
+func validateToken(token string, publicKeyPath string) (bool, error) {
+	publicKey, err := getPublicKey(publicKeyPath)
 	if err != nil {
 		return false, err
 	}
@@ -101,13 +102,13 @@ func validateTokenExpiration(token string) (parts []string, err error) {
 	return parts, nil
 }
 
-func getPublicKey() (*rsa.PublicKey, error) {
+func getPublicKey(publicKeyPath string) (*rsa.PublicKey, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read current working dir, cause: %s", err)
 	}
 
-	pemContent, err := os.ReadFile(wd + "/certs/public.pem")
+	pemContent, err := os.ReadFile(wd + publicKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read .pem file, cause: %s", err)
 	}
