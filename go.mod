@@ -1,4 +1,4 @@
-module github.alissonbk/kk-service-auth-lib
+module github.com/alissonbk/kk-service-auth-lib
 
 go 1.24.5
 
