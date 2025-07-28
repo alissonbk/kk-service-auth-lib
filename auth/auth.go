@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"crypto/rsa"
 	"encoding/base64"
 	"errors"
@@ -11,23 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alissonbk/kk-service-auth-lib/types"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// This is compatible with Gin and Fiber (90% sure), need to check with other frameworks
-type ContextWithHeader interface {
-	context.Context
-	GetHeader(s string) string
-	JSON(int, interface{}) error
-	// Status(int)
-	Abort()
-	Next()
-}
-type HandlerFunc func(ContextWithHeader)
-
 // publicKeyPath is the path containing the .pem file with the keycloak public key example: "/certs/public.pem"
-func AuthRequired(publicKeyPath string) HandlerFunc {
-	return func(c ContextWithHeader) {
+func AuthRequired(publicKeyPath string) types.HandlerFunc {
+	return func(c types.ContextWithHeader) {
 		authHeader := c.GetHeader("Authorization")
 		split := strings.Split(authHeader, " ")
 		if len(split) != 2 {
