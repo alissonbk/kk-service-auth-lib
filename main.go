@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/alissonbk/kk-service-auth-lib/auth"
 
 func main() {
-	fmt.Println("hello wolrd")
+	auth.AuthRequired(&auth.PublicKey{PublicKeyPath: ""})
 }
